@@ -87,6 +87,9 @@ resource "aws_instance" "jumpbox" {
 
   key_name = local.key_pair_name
 
+  user_data                   = file("${path.module}/jumpbox_setup.sh")
+  user_data_replace_on_change = true
+
   root_block_device {
     volume_size = local.jumpox_root_vol_size
   }
