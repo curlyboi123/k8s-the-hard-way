@@ -1,5 +1,6 @@
 locals {
-  region = "eu-west-1"
+  region        = "eu-west-1"
+  key_pair_name = "accenture-laptop"
 }
 
 provider "aws" {
@@ -7,7 +8,6 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Name    = "k8s-the-hard-way"
       Project = "github.com/curlyboi123/k8s-the-hard-way"
     }
   }
@@ -64,9 +64,59 @@ resource "aws_instance" "jumpbox" {
   vpc_security_group_ids = [aws_security_group.main.id]
   subnet_id              = module.vpc.public_subnets[0]
 
-  key_name = "accenture-laptop"
+  associate_public_ip_address = true
+
+  key_name = local.key_pair_name
 
   root_block_device {
     volume_size = 10
+  }
+
+  tags = {
+    Name = "jumpbox"
+  }
+}
+
+resource "aws_instance" "server" {
+  ami = data.aws_ami.debian.id
+
+  instance_type = "t3.small"
+
+  vpc_security_group_ids = [aws_security_group.main.id]
+  subnet_id              = module.vpc.public_subnets[0]
+
+  associate_public_ip_address = true
+
+  key_name = local.key_pair_name
+
+  root_block_device {
+    volume_size = 20
+  }
+
+  tags = {
+    Name = "server"
+  }
+}
+
+resource "aws_instance" "node" {
+  count = 2
+
+  ami = data.aws_ami.debian.id
+
+  instance_type = "t3.small"
+
+  vpc_security_group_ids = [aws_security_group.main.id]
+  subnet_id              = module.vpc.public_subnets[0]
+
+  associate_public_ip_address = true
+
+  key_name = local.key_pair_name
+
+  root_block_device {
+    volume_size = 20
+  }
+
+  tags = {
+    Name = "node-${count.index}"
   }
 }
