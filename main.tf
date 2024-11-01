@@ -75,6 +75,48 @@ data "aws_ami" "debian_arm64" {
   }
 }
 
+data "cloudinit_config" "jumpbox" {
+  gzip          = false
+  base64_encode = false
+
+  part {
+    filename     = "allow_root_ssh.sh"
+    content_type = "text/x-shellscript"
+
+    content = file("${path.module}/scripts/allow_root_ssh.sh")
+  }
+
+  part {
+    filename     = "cloud.conf"
+    content_type = "text/cloud-config"
+
+    content = yamlencode(
+      {
+        "write_files" : [
+          {
+            "path" : "/root/machines.txt"
+            "content" : templatefile("${path.module}/templates/machines.tftpl",
+              {
+                server_ip = aws_instance.server.public_ip,
+                node_0_ip = aws_instance.node[0].public_ip
+                node_1_ip = aws_instance.node[1].public_ip
+            })
+          }
+        ]
+      }
+    )
+  }
+
+  part {
+    filename     = "jumpbox_setup.sh"
+    content_type = "text/x-shellscript"
+
+    content = file("${path.module}/scripts/jumpbox_setup.sh")
+  }
+
+
+}
+
 resource "aws_instance" "jumpbox" {
   ami = data.aws_ami.debian_arm64.id
 
@@ -87,7 +129,7 @@ resource "aws_instance" "jumpbox" {
 
   key_name = local.key_pair_name
 
-  user_data                   = file("${path.module}/jumpbox_setup.sh")
+  user_data                   = data.cloudinit_config.jumpbox.rendered
   user_data_replace_on_change = true
 
   root_block_device {
