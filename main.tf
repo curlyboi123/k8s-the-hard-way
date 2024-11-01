@@ -111,6 +111,9 @@ resource "aws_instance" "server" {
 
   key_name = local.key_pair_name
 
+  user_data                   = file("${path.module}/scripts/allow_root_ssh.sh")
+  user_data_replace_on_change = true
+
   root_block_device {
     volume_size = local.server_node_root_vol_size
   }
@@ -133,6 +136,9 @@ resource "aws_instance" "node" {
   associate_public_ip_address = true
 
   key_name = local.key_pair_name
+
+  user_data                   = file("${path.module}/scripts/allow_root_ssh.sh")
+  user_data_replace_on_change = true
 
   root_block_device {
     volume_size = local.server_node_root_vol_size
