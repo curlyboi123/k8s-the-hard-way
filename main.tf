@@ -1,6 +1,7 @@
 locals {
   region        = "eu-west-1"
   key_pair_name = "accenture-laptop"
+  my_ipv4       = "${chomp(data.http.my_ipv4.response_body)}/32"
 }
 
 provider "aws" {
@@ -11,6 +12,10 @@ provider "aws" {
       Project = "github.com/curlyboi123/k8s-the-hard-way"
     }
   }
+}
+
+data "http" "my_ipv4" {
+  url = "https://ipv4.icanhazip.com"
 }
 
 module "vpc" {
@@ -32,6 +37,15 @@ resource "aws_security_group" "main" {
   description = "Control traffic to k8s instances"
   vpc_id      = module.vpc.vpc_id
 }
+
+resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ingress_from_my_ip" {
+  security_group_id = aws_security_group.main.id
+  cidr_ipv4         = local.my_ipv4
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22
+}
+
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_egress" {
   security_group_id = aws_security_group.main.id
