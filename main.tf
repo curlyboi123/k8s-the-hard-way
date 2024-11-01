@@ -1,7 +1,12 @@
 locals {
   region        = "eu-west-1"
-  key_pair_name = "accenture-laptop"
+  key_pair_name = "personal-pc-wsl"
   my_ipv4       = "${chomp(data.http.my_ipv4.response_body)}/32"
+
+  jumpbox_instance_type     = "t4g.nano"
+  jumpox_root_vol_size      = 10
+  server_node_instance_type = "t4g.small"
+  server_node_root_vol_size = 20
 }
 
 provider "aws" {
@@ -55,7 +60,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_egress" {
   to_port           = 443
 }
 
-data "aws_ami" "debian" {
+data "aws_ami" "debian_arm64" {
   most_recent = true
   owners      = ["amazon"]
 
@@ -71,9 +76,9 @@ data "aws_ami" "debian" {
 }
 
 resource "aws_instance" "jumpbox" {
-  ami = data.aws_ami.debian.id
+  ami = data.aws_ami.debian_arm64.id
 
-  instance_type = "t3.nano"
+  instance_type = local.jumpbox_instance_type
 
   vpc_security_group_ids = [aws_security_group.main.id]
   subnet_id              = module.vpc.public_subnets[0]
@@ -83,7 +88,7 @@ resource "aws_instance" "jumpbox" {
   key_name = local.key_pair_name
 
   root_block_device {
-    volume_size = 10
+    volume_size = local.jumpox_root_vol_size
   }
 
   tags = {
@@ -92,9 +97,9 @@ resource "aws_instance" "jumpbox" {
 }
 
 resource "aws_instance" "server" {
-  ami = data.aws_ami.debian.id
+  ami = data.aws_ami.debian_arm64.id
 
-  instance_type = "t3.small"
+  instance_type = local.server_node_instance_type
 
   vpc_security_group_ids = [aws_security_group.main.id]
   subnet_id              = module.vpc.public_subnets[0]
@@ -104,7 +109,7 @@ resource "aws_instance" "server" {
   key_name = local.key_pair_name
 
   root_block_device {
-    volume_size = 20
+    volume_size = local.server_node_root_vol_size
   }
 
   tags = {
@@ -115,9 +120,9 @@ resource "aws_instance" "server" {
 resource "aws_instance" "node" {
   count = 2
 
-  ami = data.aws_ami.debian.id
+  ami = data.aws_ami.debian_arm64.id
 
-  instance_type = "t3.small"
+  instance_type = local.server_node_instance_type
 
   vpc_security_group_ids = [aws_security_group.main.id]
   subnet_id              = module.vpc.public_subnets[0]
@@ -127,7 +132,7 @@ resource "aws_instance" "node" {
   key_name = local.key_pair_name
 
   root_block_device {
-    volume_size = 20
+    volume_size = local.server_node_root_vol_size
   }
 
   tags = {
