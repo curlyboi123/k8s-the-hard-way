@@ -15,7 +15,7 @@ provider "aws" {
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "5.14.0"
+  version = "~> 5.14.0"
 
   name = "k8s-hard-way-vpc"
   cidr = "10.0.0.0/27"
