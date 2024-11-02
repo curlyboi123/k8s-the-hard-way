@@ -96,14 +96,7 @@ data "cloudinit_config" "jumpbox" {
   base64_encode = false
 
   part {
-    filename     = "allow_root_ssh.sh"
-    content_type = "text/x-shellscript"
-
-    content = file("${path.module}/scripts/allow_root_ssh.sh")
-  }
-
-  part {
-    filename     = "cloud.conf"
+    filename     = "00_add_machines_file"
     content_type = "text/cloud-config"
 
     content = yamlencode(
@@ -124,13 +117,26 @@ data "cloudinit_config" "jumpbox" {
   }
 
   part {
-    filename     = "jumpbox_setup.sh"
+    filename     = "01_allow_root_ssh.sh"
     content_type = "text/x-shellscript"
 
-    content = file("${path.module}/scripts/jumpbox_setup.sh")
+    content = file("${path.module}/scripts/01_allow_root_ssh.sh")
   }
 
 
+  part {
+    filename     = "02_jumpbox_setup.sh"
+    content_type = "text/x-shellscript"
+
+    content = file("${path.module}/scripts/02_jumpbox_setup.sh")
+  }
+
+  part {
+    filename     = "03_compute_resources_setup.sh"
+    content_type = "text/x-shellscript"
+
+    content = file("${path.module}/scripts/03_compute_resources_setup.sh")
+  }
 }
 
 resource "aws_instance" "jumpbox" {
@@ -169,7 +175,7 @@ resource "aws_instance" "server" {
 
   key_name = local.key_pair_name
 
-  user_data                   = file("${path.module}/scripts/allow_root_ssh.sh")
+  user_data                   = file("${path.module}/scripts/01_allow_root_ssh.sh")
   user_data_replace_on_change = true
 
   root_block_device {
@@ -195,7 +201,7 @@ resource "aws_instance" "node" {
 
   key_name = local.key_pair_name
 
-  user_data                   = file("${path.module}/scripts/allow_root_ssh.sh")
+  user_data                   = file("${path.module}/scripts/01_allow_root_ssh.sh")
   user_data_replace_on_change = true
 
   root_block_device {
