@@ -103,7 +103,7 @@ data "cloudinit_config" "jumpbox" {
       {
         "write_files" : [
           {
-            "path" : "/root/machines.txt"
+            "path" : "/tmp/machines.txt"
             "content" : templatefile("${path.module}/templates/machines.tftpl",
               {
                 server_ip = aws_instance.server.private_ip,

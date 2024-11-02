@@ -10,7 +10,7 @@ git clone --depth 1 https://github.com/kelseyhightower/kubernetes-the-hard-way.g
 
 cd kubernetes-the-hard-way
 
-mv /root/machines.txt ./
+mv /tmp/machines.txt ./
 
 mkdir downloads
 
