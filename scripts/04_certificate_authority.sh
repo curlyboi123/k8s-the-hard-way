@@ -1,4 +1,6 @@
 #!/bin/bash
+su - root
+cd /root/kubernetes-the-hard-way
 
 # Certificate Authority
 {
