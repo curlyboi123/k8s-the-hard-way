@@ -151,6 +151,13 @@ data "cloudinit_config" "jumpbox" {
 
     content = file("${path.module}/scripts/04_certificate_authority.sh")
   }
+
+  part {
+    filename     = "05_kubernetes_configuration_files.sh"
+    content_type = "text/x-shellscript"
+
+    content = file("${path.module}/scripts/05_kubernetes_configuration_files.sh")
+  }
 }
 
 resource "aws_instance" "jumpbox" {
