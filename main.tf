@@ -14,7 +14,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project = "github.com/curlyboi123/k8s-the-hard-way"
+      Project = "https://github.com/curlyboi123/k8s-the-hard-way"
     }
   }
 }
