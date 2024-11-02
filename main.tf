@@ -96,6 +96,13 @@ data "cloudinit_config" "jumpbox" {
   base64_encode = false
 
   part {
+    filename     = "_00_install_ssm_agent.sh"
+    content_type = "text/x-shellscript"
+
+    content = file("${path.module}/scripts/_00_install_ssm_agent.sh")
+  }
+
+  part {
     filename     = "00_add_machines_file"
     content_type = "text/cloud-config"
 
