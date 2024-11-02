@@ -60,6 +60,22 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_egress" {
   to_port           = 443
 }
 
+resource "aws_vpc_security_group_ingress_rule" "allow_internal_ssh_ingress" {
+  security_group_id = aws_security_group.main.id
+  cidr_ipv4         = module.vpc.public_subnets_cidr_blocks[0]
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_internal_ssh_egress" {
+  security_group_id = aws_security_group.main.id
+  cidr_ipv4         = module.vpc.public_subnets_cidr_blocks[0]
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22
+}
+
 data "aws_ami" "debian_arm64" {
   most_recent = true
   owners      = ["amazon"]
