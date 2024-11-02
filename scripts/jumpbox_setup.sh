@@ -19,8 +19,24 @@ wget -q \
   -P downloads \
   -i downloads.txt
 
-echo "make kubectl executable"
 {
   chmod +x downloads/kubectl
   cp downloads/kubectl /usr/local/bin/
 }
+
+cat <<EOT >> /root/.ssh/config
+Host *
+  StrictHostKeyChecking no
+EOT
+
+ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa -q -N ""
+
+while read IP FQDN HOST SUBNET; do
+  echo ${IP} ${FQDN} ${HOST} ${SUBNET}
+  ssh-copy-id -f -i /root/.ssh/id_rsa.pub root@${IP}
+done < machines.txt
+
+while read IP FQDN HOST SUBNET; do
+  echo ${IP} ${FQDN} ${HOST} ${SUBNET}
+  ssh -i /root/.ssh/id_rsa.pub -n root@${IP} uname -o -m
+done < machines.txt
