@@ -123,54 +123,13 @@ data "cloudinit_config" "jumpbox" {
     )
   }
 
-  part {
-    filename     = "01_allow_root_ssh.sh"
-    content_type = "text/x-shellscript"
-
-    content = file("${path.module}/scripts/01_allow_root_ssh.sh")
-  }
-
-
-  part {
-    filename     = "02_jumpbox_setup.sh"
-    content_type = "text/x-shellscript"
-
-    content = file("${path.module}/scripts/02_jumpbox_setup.sh")
-  }
-
-  part {
-    filename     = "03_compute_resources_setup.sh"
-    content_type = "text/x-shellscript"
-
-    content = file("${path.module}/scripts/03_compute_resources_setup.sh")
-  }
-
-  part {
-    filename     = "04_certificate_authority.sh"
-    content_type = "text/x-shellscript"
-
-    content = file("${path.module}/scripts/04_certificate_authority.sh")
-  }
-
-  part {
-    filename     = "05_kubernetes_configuration_files.sh"
-    content_type = "text/x-shellscript"
-
-    content = file("${path.module}/scripts/05_kubernetes_configuration_files.sh")
-  }
-
-  part {
-    filename     = "06_data_encryption_keys.sh"
-    content_type = "text/x-shellscript"
-
-    content = file("${path.module}/scripts/06_data_encryption_keys.sh")
-  }
-
-  part {
-    filename     = "07_bootstrapping_etcd.sh"
-    content_type = "text/x-shellscript"
-
-    content = file("${path.module}/scripts/07_bootstrapping_etcd.sh")
+  dynamic "part" {
+    for_each = fileset("${path.module}/scripts/k8s_setup", "*")
+    content {
+      filename     = part.value
+      content_type = "text/x-shellscript"
+      content      = file("scripts/k8s_setup/${part.value}")
+    }
   }
 }
 
@@ -212,7 +171,7 @@ resource "aws_instance" "server" {
 
   key_name = local.key_pair_name
 
-  user_data                   = file("${path.module}/scripts/01_allow_root_ssh.sh")
+  user_data                   = file("${path.module}/scripts/k8s_setup/01_allow_root_ssh.sh")
   user_data_replace_on_change = true
 
   root_block_device {
@@ -238,7 +197,7 @@ resource "aws_instance" "node" {
 
   key_name = local.key_pair_name
 
-  user_data                   = file("${path.module}/scripts/01_allow_root_ssh.sh")
+  user_data                   = file("${path.module}/scripts/k8s_setup/01_allow_root_ssh.sh")
   user_data_replace_on_change = true
 
   root_block_device {
