@@ -1,7 +1,8 @@
 locals {
-  region        = "eu-west-1"
-  key_pair_name = "personal-pc-wsl"
-  my_ipv4       = "${chomp(data.http.my_ipv4.response_body)}/32"
+  region            = "eu-west-1"
+  key_pair_name     = "personal-pc-wsl"
+  allow_ssh_with_kp = false
+  my_ipv4           = "${chomp(data.http.my_ipv4.response_body)}/32"
 
   jumpbox_instance_type     = "t4g.nano"
   jumpox_root_vol_size      = 10
@@ -44,6 +45,8 @@ resource "aws_security_group" "main" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ingress_from_my_ip" {
+  count = local.allow_ssh_with_kp ? 1 : 0
+
   security_group_id = aws_security_group.main.id
   cidr_ipv4         = local.my_ipv4
   from_port         = 22
@@ -143,7 +146,7 @@ resource "aws_instance" "jumpbox" {
 
   associate_public_ip_address = true
 
-  key_name = local.key_pair_name
+  key_name = local.allow_ssh_with_kp ? local.key_pair_name : null
 
   user_data                   = data.cloudinit_config.jumpbox.rendered
   user_data_replace_on_change = true
@@ -169,7 +172,7 @@ resource "aws_instance" "server" {
 
   associate_public_ip_address = true
 
-  key_name = local.key_pair_name
+  key_name = local.allow_ssh_with_kp ? local.key_pair_name : null
 
   user_data                   = file("${path.module}/scripts/k8s_setup/01_allow_root_ssh.sh")
   user_data_replace_on_change = true
@@ -195,7 +198,7 @@ resource "aws_instance" "node" {
 
   associate_public_ip_address = true
 
-  key_name = local.key_pair_name
+  key_name = local.allow_ssh_with_kp ? local.key_pair_name : null
 
   user_data                   = file("${path.module}/scripts/k8s_setup/01_allow_root_ssh.sh")
   user_data_replace_on_change = true
