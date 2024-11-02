@@ -165,6 +165,13 @@ data "cloudinit_config" "jumpbox" {
 
     content = file("${path.module}/scripts/06_data_encryption_keys.sh")
   }
+
+  part {
+    filename     = "07_bootstrapping_etcd.sh"
+    content_type = "text/x-shellscript"
+
+    content = file("${path.module}/scripts/07_bootstrapping_etcd.sh")
+  }
 }
 
 resource "aws_instance" "jumpbox" {
