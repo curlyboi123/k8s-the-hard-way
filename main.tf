@@ -158,6 +158,13 @@ data "cloudinit_config" "jumpbox" {
 
     content = file("${path.module}/scripts/05_kubernetes_configuration_files.sh")
   }
+
+  part {
+    filename     = "06_data_encryption_keys.sh"
+    content_type = "text/x-shellscript"
+
+    content = file("${path.module}/scripts/06_data_encryption_keys.sh")
+  }
 }
 
 resource "aws_instance" "jumpbox" {
