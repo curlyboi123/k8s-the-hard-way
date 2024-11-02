@@ -154,6 +154,8 @@ resource "aws_instance" "jumpbox" {
   user_data                   = data.cloudinit_config.jumpbox.rendered
   user_data_replace_on_change = true
 
+  iam_instance_profile = aws_iam_instance_profile.k8s_instances.name
+
   root_block_device {
     volume_size = local.jumpox_root_vol_size
   }
