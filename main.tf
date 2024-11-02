@@ -113,9 +113,9 @@ data "cloudinit_config" "jumpbox" {
             "path" : "/root/machines.txt"
             "content" : templatefile("${path.module}/templates/machines.tftpl",
               {
-                server_ip = aws_instance.server.public_ip,
-                node_0_ip = aws_instance.node[0].public_ip
-                node_1_ip = aws_instance.node[1].public_ip
+                server_ip = aws_instance.server.private_ip,
+                node_0_ip = aws_instance.node[0].private_ip
+                node_1_ip = aws_instance.node[1].private_ip
             })
           }
         ]
